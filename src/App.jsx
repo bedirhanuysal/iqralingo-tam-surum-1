@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Home, BookOpen, GraduationCap, User, PlayCircle, Bookmark, Star, Moon, 
   ArrowRight, Mail, Lock, Eye, EyeOff, Clock, ChevronDown, ChevronUp, MapPin, 
   Loader2, ArrowLeft, RotateCcw, CheckCircle, Heart, Flame, Diamond, Volume2, 
   X, RefreshCw, MessageSquare, Sparkles, Send, Info, CloudSun, Wind, Quote, 
-  Trophy, Compass, Settings, Bell, LogOut, Award, Edit3, Calendar
+  Trophy, Compass, Settings, Bell, LogOut, Award, Edit3, Calendar, Crown, Coffee, Gift, Zap, ShieldCheck, UserPlus, LogIn
 } from 'lucide-react';
 
 // ============================================================================================
@@ -44,6 +44,13 @@ const globalStyles = `
       background-color: #047857;
       background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23065f46' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
+  @keyframes fade-in-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out forwards;
+  }
 `;
 
 const formatTime = (seconds) => {
@@ -53,8 +60,199 @@ const formatTime = (seconds) => {
 };
 
 // ============================================================================================
-// 2. VERİ TABANI
+// 2. VERİ TABANI (GENİŞLETİLMİŞ HADİS LİSTESİ)
 // ============================================================================================
+
+const HADITHS_DATABASE = [
+  { text: "Ameller niyetlere göredir.", source: "Buhari" },
+  { text: "Kolaylaştırınız, zorlaştırmayınız; müjdeleyiniz, nefret ettirmeyiniz.", source: "Buhari" },
+  { text: "Sizin en hayırlınız, Kuran'ı öğrenen ve öğretendir.", source: "Tirmizi" },
+  { text: "Temizlik imanın yarısıdır.", source: "Müslim" },
+  { text: "Namaz dinin direğidir.", source: "Tirmizi" },
+  { text: "Cennet annelerin ayakları altındadır.", source: "Nesai" },
+  { text: "Müslüman, elinden ve dilinden diğer Müslümanların emin olduğu kimsedir.", source: "Buhari" },
+  { text: "Hayra vesile olan, hayrı yapan gibidir.", source: "Tirmizi" },
+  { text: "İki günü eşit olan ziyandadır.", source: "Hadis-i Şerif" },
+  { text: "Güzel söz sadakadır.", source: "Buhari" },
+  { text: "Komşusu açken tok yatan bizden değildir.", source: "Hakim" },
+  { text: "İlim Çin'de de olsa gidip alınız.", source: "Taberani" },
+  { text: "Veren el, alan elden üstündür.", source: "Buhari" },
+  { text: "Hiçbir baba, çocuğuna güzel terbiyeden daha kıymetli bir miras bırakmamıştır.", source: "Tirmizi" },
+  { text: "Merhamet etmeyene merhamet olunmaz.", source: "Buhari" },
+  { text: "Tebessüm sadakadır.", source: "Tirmizi" },
+  { text: "Kim bir hayır işlerse, kendisine onun on misli vardır.", source: "En'am Suresi" },
+  { text: "Dua müminin silahıdır.", source: "Hakim" },
+  { text: "Sabır, kurtuluşun anahtarıdır.", source: "Hadis-i Şerif" },
+  { text: "Öfke şeytandandır.", source: "Ebu Davud" },
+  { text: "Kişi sevdiği ile beraberdir.", source: "Buhari" },
+  { text: "Hediyeleşin, birbirinizi sevin.", source: "Buhari" },
+  { text: "Mümin, bir delikten iki defa ısırılmaz.", source: "Buhari" },
+  { text: "Haset, ateşin odunu yediği gibi iyilikleri yer bitirir.", source: "Ebu Davud" },
+  { text: "İnsanların en hayırlısı, insanlara faydalı olandır.", source: "Taberani" },
+  { text: "Bizi aldatan bizden değildir.", source: "Müslim" },
+  { text: "Zenginlik mal çokluğu değil, gönül tokluğudur.", source: "Buhari" },
+  { text: "Doğruluk iyiliğe, iyilik cennete götürür.", source: "Buhari" },
+  { text: "Yalan kötülüğe, kötülük cehenneme götürür.", source: "Buhari" },
+  { text: "İşçinin hakkını alnının teri kurumadan veriniz.", source: "İbn Mace" },
+  { text: "Mazlumun bedduasından sakının.", source: "Buhari" },
+  { text: "Her zorlukla beraber bir kolaylık vardır.", source: "İnşirah Suresi" },
+  { text: "Allah güzeldir, güzelliği sever.", source: "Müslim" },
+  { text: "Sıla-i rahim (akraba ziyareti) ömrü uzatır.", source: "Tirmizi" },
+  { text: "Kim susarsa kurtulur.", source: "Tirmizi" },
+  { text: "Utanmadıktan sonra dilediğini yap.", source: "Buhari" },
+  { text: "Acele şeytandan, teenni Allah'tandır.", source: "Tirmizi" },
+  { text: "Dünya müminin zindanı, kafirin cennetidir.", source: "Müslim" },
+  { text: "İlim öğrenmek her Müslüman erkek ve kadına farzdır.", source: "İbn Mace" },
+  { text: "Beşikten mezara kadar ilim öğreniniz.", source: "Hadis-i Şerif" },
+  { text: "Müminlerin iman bakımından en mükemmeli, ahlakı en güzel olanıdır.", source: "Tirmizi" },
+  { text: "Kim Allah'a ve ahiret gününe inanıyorsa ya hayır söylesin ya da sussun.", source: "Buhari" },
+  { text: "Müslüman müslümanın kardeşidir. Ona zulmetmez.", source: "Buhari" },
+  { text: "Kim bir müslümanın sıkıntısını giderirse, Allah da onun sıkıntısını giderir.", source: "Müslim" },
+  { text: "Allah, yumuşak huylu kimseleri sever.", source: "Müslim" },
+  { text: "Sadaka verin, hastalarınızı sadaka ile tedavi edin.", source: "Taberani" },
+  { text: "Hata yapanların en hayırlısı tövbe edenlerdir.", source: "Tirmizi" },
+  { text: "Allah'ın rızası anne babanın rızasındadır.", source: "Tirmizi" },
+  { text: "Cemaatte rahmet, ayrılıkta azap vardır.", source: "Hadis-i Şerif" },
+  { text: "Bir saat tefekkür, bir sene nafile ibadetten hayırlıdır.", source: "Hadis-i Şerif" },
+  { text: "Yarım hurma ile de olsa kendinizi ateşten koruyun.", source: "Buhari" },
+  { text: "İnsanlara merhamet etmeyene Allah merhamet etmez.", source: "Müslim" },
+  { text: "Gıybet, kardeşinin ölü etini yemek gibidir.", source: "Hucurat Suresi" },
+  { text: "Söz taşıyan cennete giremez.", source: "Buhari" },
+  { text: "Kuran okuyunuz. O, sahibine şefaatçi olacaktır.", source: "Müslim" },
+  { text: "Sizin en hayırlınız, ailesine karşı en hayırlı olandır.", source: "Tirmizi" },
+  { text: "Allah temizdir, temizliği sever.", source: "Tirmizi" },
+  { text: "Namazın anahtarı temizliktir.", source: "Tirmizi" },
+  { text: "Suizandan sakının.", source: "Buhari" },
+  { text: "Birbirinizin kusurlarını araştırmayın.", source: "Hucurat Suresi" },
+  { text: "Birbirinize haset etmeyin.", source: "Müslim" },
+  { text: "Birbirinize sırt çevirmeyin.", source: "Müslim" },
+  { text: "Ey Allah'ın kulları! Kardeş olun.", source: "Müslim" },
+  { text: "Kim bir hayra öncülük ederse, o hayrı yapanın ecri gibi alır.", source: "Müslim" },
+  { text: "Allah katında amellerin en sevimlisi, az da olsa devamlı olanıdır.", source: "Buhari" },
+  { text: "İki nimet vardır: Sağlık ve boş vakit.", source: "Buhari" },
+  { text: "Hastalık gelmeden önce sağlığın kıymetini bil.", source: "Hakim" },
+  { text: "Kibir, hakkı inkar etmek ve insanları küçük görmektir.", source: "Müslim" },
+  { text: "Kalbinde zerre kadar kibir olan cennete giremez.", source: "Müslim" },
+  { text: "Tevazu göstereni Allah yüceltir.", source: "Müslim" },
+  { text: "Sadaka malı eksiltmez.", source: "Müslim" },
+  { text: "Affedenin izzeti artar.", source: "Müslim" },
+  { text: "Rızkın onda dokuzu ticarettendir.", source: "Hadis-i Şerif" },
+  { text: "Helal belli, haram bellidir.", source: "Buhari" },
+  { text: "Şüpheli şeylerden sakınan dinini korur.", source: "Buhari" },
+  { text: "Her doğan, İslam fıtratı üzerine doğar.", source: "Buhari" },
+  { text: "Müminler, bir vücudun azaları gibidir.", source: "Müslim" },
+  { text: "Haya imandandır.", source: "Buhari" },
+  { text: "Mümin, rüzgar estikçe eğilen ekin gibidir, yıkılmaz.", source: "Buhari" },
+  { text: "Münafığın alameti üçtür: Yalan söyler, sözünde durmaz, emanete hıyanet eder.", source: "Buhari" },
+  { text: "Allah sizin kalplerinize bakar.", source: "Müslim" },
+  { text: "Ameller sonuçlarına göre değerlendirilir.", source: "Buhari" },
+  { text: "Kişi arkadaşının dini üzerinedir.", source: "Tirmizi" },
+  { text: "İyi arkadaş misk taşıyan gibidir.", source: "Buhari" },
+  { text: "Danışan pişman olmaz.", source: "Taberani" },
+  { text: "Namaz gözümün nurudur.", source: "Nesai" },
+  { text: "Oruç kalkandır.", source: "Buhari" },
+  { text: "Dua ibadetin özüdür.", source: "Tirmizi" },
+  { text: "Allah ısrarla dua edenleri sever.", source: "Beyhaki" },
+  { text: "Acele etmediğiniz sürece duanız kabul olunur.", source: "Buhari" },
+  { text: "Cennet cömertler yurdudur.", source: "Deylemi" },
+  { text: "Cimri Allah'a uzak, cehenneme yakındır.", source: "Tirmizi" },
+  { text: "Sadaka belayı defeder.", source: "Tirmizi" },
+  { text: "Gülümsemek sadakadır.", source: "Tirmizi" },
+  { text: "İlim müminin yitik malıdır.", source: "Tirmizi" },
+  { text: "Hikmet müminin yitik malıdır.", source: "Tirmizi" },
+  { text: "Alimler peygamberlerin varisleridir.", source: "Tirmizi" },
+  { text: "Faydasız ilimden Allah'a sığınırım.", source: "Müslim" },
+  { text: "Allah'ım ilmimi artır.", source: "Taha Suresi" },
+  { text: "Kur'an'ı sesinizle süsleyin.", source: "Ebu Davud" },
+  { text: "Evlerinizi kabirlere çevirmeyin.", source: "Müslim" },
+  { text: "Yasin, Kur'an'ın kalbidir.", source: "Tirmizi" },
+  { text: "Fatiha her derde şifadır.", source: "Darimi" },
+  { text: "Namazın ilk vakti Allah'ın rızasıdır.", source: "Tirmizi" },
+  { text: "Kulun Rabbine en yakın olduğu an secde anıdır.", source: "Müslim" },
+  { text: "Namaz müminin miracıdır.", source: "Hadis-i Şerif" },
+  { text: "Namaz cennetin anahtarıdır.", source: "Tirmizi" },
+  { text: "Mümin müminin aynasıdır.", source: "Ebu Davud" },
+  { text: "Din samimiyettir.", source: "Müslim" },
+  { text: "İslam güzel ahlaktır.", source: "Kenzu'l-Ummal" },
+  { text: "Dünya sevgisi her hatanın başıdır.", source: "Beyhaki" },
+  { text: "Kanaat tükenmez bir hazinedir.", source: "Taberani" },
+  { text: "Tedbir gibi akıl yoktur.", source: "İbn Mace" },
+  { text: "Güzel ahlak gibi asalet yoktur.", source: "İbn Mace" },
+  { text: "Ticarette bereket vardır.", source: "Müslim" },
+  { text: "Uyku ölümün kardeşidir.", source: "Beyhaki" },
+  { text: "Lezzetleri yıkan ölümü çokça hatırlayın.", source: "Tirmizi" },
+  { text: "Nasıl yaşarsanız öyle ölürsünüz.", source: "Hadis-i Şerif" },
+  { text: "Kişi sevdiği ile haşrolunur.", source: "Taberani" },
+  { text: "Allah'ım beni bağışla ve merhamet et.", source: "Müslim" },
+  { text: "Rabbimiz bize dünyada ve ahirette iyilik ver.", source: "Bakara Suresi" },
+  { text: "Zulüm, kıyamet günü karanlıktır.", source: "Buhari" },
+  { text: "İyilik, yüzü güldürür, kalbi ferahlatır.", source: "İbn Abbas" },
+  { text: "En hayırlı ev, içinde yetime iyilik yapılan evdir.", source: "İbn Mace" },
+  { text: "Sabır, imanın yarısıdır.", source: "Ebu Nuaym" },
+  { text: "Şükür, imanın yarısıdır.", source: "Ebu Nuaym" },
+  { text: "Dua, rahmet kapılarını açar.", source: "Tirmizi" },
+  { text: "Sadaka ömrü uzatır.", source: "Taberani" },
+  { text: "Sıla-i rahim, rızkı bollaştırır.", source: "Buhari" },
+  { text: "Anne babasına iyilik edenin ömrü bereketli olur.", source: "Tirmizi" },
+  { text: "Cennet cömertlerin yurdudur.", source: "Taberani" },
+  { text: "Tevazu, kişiyi yüceltir.", source: "Müslim" },
+  { text: "Kibir, insanı alçaltır.", source: "Müslim" },
+  { text: "Öfke, imanı bozar.", source: "Beyhaki" },
+  { text: "Haset, iyilikleri yakar.", source: "Ebu Davud" },
+  { text: "Yalan, rızkı azaltır.", source: "Müslim" },
+  { text: "Doğruluk, kalbe huzur verir.", source: "Tirmizi" },
+  { text: "Emanete ihanet nifak alametidir.", source: "Buhari" },
+  { text: "Sözünde durmak imandandır.", source: "Müslim" },
+  { text: "İlim, rütbelerin en yücesidir.", source: "Hz. Ali" },
+  { text: "Cahillik, en büyük fakirliktir.", source: "Hz. Ali" },
+  { text: "Akıl, en büyük zenginliktir.", source: "Hz. Ali" },
+  { text: "Güzel ahlak, en iyi dosttur.", source: "Hz. Ali" },
+  { text: "İstişare, başarının anahtarıdır.", source: "Hz. Ali" },
+  { text: "Sabır, zaferin ilk adımıdır.", source: "Hz. Ali" },
+  { text: "Adalet, mülkün temelidir.", source: "Hz. Ömer" },
+  { text: "İyilik yap, karşılık bekleme.", source: "Hz. Ali" },
+  { text: "Merhamet, kalbin cilasıdır.", source: "Hz. Mevlana" },
+  { text: "Sevgi, her derdin ilacıdır.", source: "Hz. Mevlana" },
+  { text: "Dostluk, en büyük hazinedir.", source: "Hz. Ali" },
+  { text: "Kardeşlik, zor günde belli olur.", source: "Atasözü" },
+  { text: "Birlik, güçtür.", source: "Atasözü" },
+  { text: "Ayrılık, azaptır.", source: "Hadis-i Şerif" },
+  { text: "Barış, en büyük nimettir.", source: "Hadis-i Şerif" },
+  { text: "Selam, sevginin anahtarıdır.", source: "Müslim" },
+  { text: "Teşekkür, nimetin artmasına vesiledir.", source: "İbrahim Suresi" },
+  { text: "Hamd, her işin başıdır.", source: "Ebu Davud" },
+  { text: "Tövbe, günahları siler.", source: "İbn Mace" },
+  { text: "İstiğfar, rızkı açar.", source: "Ebu Davud" },
+  { text: "Zikir, kalbi diriltir.", source: "Tirmizi" },
+  { text: "Kuran, ruhun gıdasıdır.", source: "Hadis-i Şerif" },
+  { text: "Namaz, kalbin nurudur.", source: "Müslim" },
+  { text: "Oruç, bedenin zekatıdır.", source: "İbn Mace" },
+  { text: "Hac, mahşerin provasıdır.", source: "Hadis-i Şerif" },
+  { text: "Zekat, malı temizler.", source: "Tirmizi" },
+  { text: "Sadaka, Allah'ın gazabını söndürür.", source: "Tirmizi" },
+  { text: "İyilik, ömrü uzatır.", source: "Tirmizi" },
+  { text: "Kötülük, sahibine döner.", source: "Fatır Suresi" },
+  { text: "Sabreden zafere erer.", source: "Atasözü" },
+  { text: "Çalışan kazanır.", source: "Atasözü" },
+  { text: "Emek olmadan yemek olmaz.", source: "Atasözü" },
+  { text: "İlim, müminin yitiğidir.", source: "Tirmizi" },
+  { text: "Hikmet, müminin süsüdür.", source: "Hadis-i Şerif" },
+  { text: "Edep, aklın dış görünüşüdür.", source: "Hz. Mevlana" },
+  { text: "Haya, imanın süsüdür.", source: "Müslim" },
+  { text: "Vefa, imandandır.", source: "Müslim" },
+  { text: "Ahde vefa, dinin direğidir.", source: "Müslim" },
+  { text: "Söz gümüşse sükut altındır.", source: "Atasözü" },
+  { text: "Dilin kemiği yoktur ama kemik kırar.", source: "Atasözü" },
+  { text: "Tatlı dil yılanı deliğinden çıkarır.", source: "Atasözü" },
+  { text: "Kalp kırma, Allah'ı incitirsin.", source: "Yunus Emre" },
+  { text: "Yaratılanı hoş gör, Yaratandan ötürü.", source: "Yunus Emre" },
+  { text: "Sevelim, sevilelim, dünya kimseye kalmaz.", source: "Yunus Emre" },
+  { text: "İlim ilim bilmektir, ilim kendin bilmektir.", source: "Yunus Emre" },
+  { text: "Bana bir harf öğretenin kırk yıl kölesi olurum.", source: "Hz. Ali" },
+  { text: "İlim, servetten hayırlıdır. İlim seni korur, serveti sen korursun.", source: "Hz. Ali" },
+  { text: "Cömertlik, cennet ağaçlarından bir ağaçtır.", source: "Hadis-i Şerif" },
+  { text: "Cimrilik, cehennem ağaçlarından bir ağaçtır.", source: "Hadis-i Şerif" }
+];
 
 const ALPHABET = [
   { id: 1, char: "ا", name: "Elif", latin: "", group: 1, isThick: false },
@@ -415,7 +613,7 @@ const generateLesson = (levelConfig) => {
 };
 
 // ============================================================================================
-// 4. YARDIMCI BİLEŞENLER (EN ÜSTTE TANIMLANSIN)
+// 4. YARDIMCI BİLEŞENLER
 // ============================================================================================
 
 function NavItem({ icon, isActive, onClick, label }) {
@@ -464,8 +662,77 @@ function PrayerTimeRow({ name, time, isActive }) {
     );
 }
 
+function AuthModal({ onClose, onLogin }) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      onLogin({
+        name: isLogin ? "Kullanıcı" : name || "Yeni Öğrenci",
+        level: "Başlangıç",
+        joined: "Şimdi",
+        avatarColor: "bg-emerald-100 text-emerald-600"
+      });
+      onClose();
+    }, 1500);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+       <div className="bg-white w-full max-w-sm rounded-3xl p-8 relative shadow-2xl animate-fade-in-up">
+          <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-600"><X size={24} /></button>
+          
+          <div className="text-center mb-8">
+             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus size={32} />
+             </div>
+             <h2 className="text-2xl font-bold text-stone-800">{isLogin ? "Tekrar Hoşgeldin!" : "Aramıza Katıl"}</h2>
+             <p className="text-sm text-stone-500 mt-1">{isLogin ? "Kaldığın yerden devam et." : "Kuran öğrenme yolculuğuna başla."}</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+             {!isLogin && (
+                <div>
+                   <label className="text-xs font-bold text-stone-500 ml-1">İsim</label>
+                   <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:border-emerald-500 transition-colors" placeholder="Adın" />
+                </div>
+             )}
+             <div>
+                <label className="text-xs font-bold text-stone-500 ml-1">E-posta</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:border-emerald-500 transition-colors" placeholder="ornek@mail.com" />
+             </div>
+             <div>
+                <label className="text-xs font-bold text-stone-500 ml-1">Şifre</label>
+                <input type="password" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:border-emerald-500 transition-colors" placeholder="••••••" />
+             </div>
+
+             <button disabled={loading} className="w-full bg-[#0F5132] hover:bg-[#0a3622] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-6">
+                {loading ? <Loader2 className="animate-spin" /> : (isLogin ? "Giriş Yap" : "Kayıt Ol")}
+             </button>
+          </form>
+
+          <div className="mt-6 text-center">
+             <p className="text-sm text-stone-500">
+                {isLogin ? "Hesabın yok mu? " : "Zaten hesabın var mı? "}
+                <button onClick={() => setIsLogin(!isLogin)} className="font-bold text-[#0F5132] hover:underline">
+                   {isLogin ? "Kayıt Ol" : "Giriş Yap"}
+                </button>
+             </p>
+          </div>
+       </div>
+    </div>
+  );
+}
+
 // ============================================================================================
-// 5. EKRAN BİLEŞENLERİ (MAIN APP'TEN ÖNCE TANIMLANSIN)
+// 5. EKRAN BİLEŞENLERİ
 // ============================================================================================
 
 function SplashScreen() {
@@ -579,19 +846,160 @@ function QiblaScreen({ onBack }) {
   );
 }
 
-function ProfileScreen({ stats }) {
-  // Mock user data
-  const user = {
-    name: "Ahmet Yılmaz",
-    level: "Orta Seviye",
-    joined: "Ocak 2024",
-    avatarColor: "bg-indigo-100 text-indigo-600"
-  };
+// 20+ Achievement Definitions
+const ALL_ACHIEVEMENTS = [
+    // Completed
+    { id: 1, title: "Hızlı Başlangıç", desc: "İlk 100 Puan", icon: "🚀", color: "from-yellow-50 to-orange-50", borderColor: "border-yellow-100", status: "completed", progress: 100 },
+    { id: 2, title: "İlk Ders", desc: "Elif-Ba Tamamlandı", icon: "📖", color: "from-emerald-50 to-teal-50", borderColor: "border-emerald-100", status: "completed", progress: 100 },
+    { id: 3, title: "Meraklı", desc: "5 Farklı Ders Yap", icon: "🧐", color: "from-blue-50 to-indigo-50", borderColor: "border-blue-100", status: "completed", progress: 100 },
+    
+    // In Progress
+    { id: 4, title: "7 Gün Seri", desc: "7 gün üst üste", icon: "🔥", color: "bg-stone-50", borderColor: "border-stone-200", status: "in_progress", progress: 42, current: 3, target: 7 },
+    { id: 5, title: "Kelime Avcısı", desc: "50 Kelime Öğren", icon: "🏹", color: "bg-stone-50", borderColor: "border-stone-200", status: "in_progress", progress: 60, current: 30, target: 50 },
+    { id: 6, title: "Kuran Bülbülü", desc: "10 Sayfa Oku", icon: "🦜", color: "bg-stone-50", borderColor: "border-stone-200", status: "in_progress", progress: 20, current: 2, target: 10 },
+    
+    // Locked
+    { id: 7, title: "30 Gün Seri", desc: "Bir ay boyunca", icon: "📆", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 10, current: 3, target: 30 },
+    { id: 8, title: "Sabah Kuşu", desc: "08:00'den önce", icon: "🌅", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 9, title: "Gece Kuşu", desc: "23:00'den sonra", icon: "🦉", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 10, title: "Mükemmeliyetçi", desc: "Hatasız Ders", icon: "🎯", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 11, title: "Hafız Adayı", desc: "1 Sure Ezberle", icon: "🧠", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 12, title: "1000 Puan", desc: "Toplam XP", icon: "⭐", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 13, title: "5000 Puan", desc: "Toplam XP", icon: "🌟", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 14, title: "Ünite 1 Ustası", desc: "Tüm yıldızlar", icon: "🥇", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 15, title: "Ünite 2 Ustası", desc: "Tüm yıldızlar", icon: "🥈", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 16, title: "Sosyal Kelebek", desc: "Arkadaşınla Paylaş", icon: "🦋", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 17, title: "Destekçi", desc: "Premium Üye", icon: "💖", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 18, title: "Zikirmatik", desc: "1000 Tesbihat", icon: "📿", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 19, title: "Kıble Kaşifi", desc: "Kıbleyi Bul", icon: "🧭", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+    { id: 20, title: "Tecvid Ustası", desc: "Tecvid Bitir", icon: "🎓", color: "bg-stone-50", borderColor: "border-stone-200", status: "locked", progress: 0, current: 0, target: 1 },
+];
 
+function ProfileScreen({ stats, user, onLoginClick, onLogout }) {
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+
+  // PREMIUM PLANS COMPONENT (Reusable)
+  const PremiumPlansSection = () => (
+    <div>
+        <h3 className="font-bold text-stone-800 mb-3 flex items-center gap-2 text-lg"><Crown size={20} className="text-yellow-500"/> Premium Planlar</h3>
+        <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
+        
+        {/* Plan 1: Basic */}
+        <div className="min-w-[200px] bg-white border border-stone-200 rounded-2xl p-4 shadow-sm relative group hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Zap size={20} />
+                </div>
+                <div>
+                    <h4 className="font-bold text-stone-800">Temel Paket</h4>
+                    <p className="text-[10px] text-stone-500">Reklamsız Deneyim</p>
+                </div>
+            </div>
+            <div className="mb-4">
+                <span className="text-2xl font-bold text-stone-800">24,99 ₺</span>
+                <span className="text-xs text-stone-400">/Ay</span>
+            </div>
+            <button className="w-full py-2 rounded-lg bg-stone-100 text-stone-600 font-bold text-xs hover:bg-stone-200 transition-colors">
+                SEÇ
+            </button>
+        </div>
+
+        {/* Plan 2: Pro (Recommended) */}
+        <div className="min-w-[220px] bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-4 shadow-lg relative group hover:shadow-xl transition-shadow text-white border border-stone-700">
+            <div className="absolute top-0 right-0 bg-yellow-500 text-stone-900 text-[10px] font-bold px-2 py-1 rounded-bl-xl rounded-tr-xl">
+                ÖNERİLEN
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-yellow-500 text-stone-900 flex items-center justify-center">
+                    <Crown size={20} fill="currentColor" />
+                </div>
+                <div>
+                    <h4 className="font-bold text-white">Pro Paket</h4>
+                    <p className="text-[10px] text-stone-400">Sınırsız Her Şey</p>
+                </div>
+            </div>
+            <div className="mb-4">
+                <span className="text-2xl font-bold text-white">49,99 ₺</span>
+                <span className="text-xs text-stone-400">/Ay</span>
+            </div>
+            <button className="w-full py-2 rounded-lg bg-yellow-500 text-stone-900 font-bold text-xs hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20">
+                SEÇ
+            </button>
+        </div>
+        </div>
+    </div>
+  );
+
+  // If user is null, show Guest View
+  if (!user) {
+    return (
+        <div className="flex flex-col min-h-full bg-stone-50 animate-fade-in scrollbar-hide">
+            <div className="bg-[#0F5132] text-white pt-12 pb-16 px-6 rounded-b-[40px] shadow-lg text-center relative overflow-hidden">
+                <div className="absolute inset-0 islamic-pattern opacity-10"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mb-4 border-4 border-white/20">
+                        <User size={48} className="opacity-80" />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">Misafir Öğrenci</h2>
+                    <p className="text-emerald-100 text-sm max-w-xs mx-auto mb-6">İlerlemeni kaydetmek, farklı cihazlardan erişmek ve başarılarını görmek için aramıza katıl.</p>
+                    <button onClick={onLoginClick} className="bg-white text-[#0F5132] px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-emerald-50 transition-colors flex items-center gap-2">
+                        <LogIn size={20} /> Giriş Yap / Kayıt Ol
+                    </button>
+                </div>
+            </div>
+
+            <div className="p-6 space-y-8">
+                {/* Local Stats */}
+                <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm text-center">
+                    <div className="flex justify-center gap-8 mb-4 opacity-50">
+                        <div className="flex flex-col items-center"><Star className="text-yellow-500 mb-1" /> <span className="font-bold text-stone-800">{stats.points}</span></div>
+                        <div className="flex flex-col items-center"><Flame className="text-orange-500 mb-1" /> <span className="font-bold text-stone-800">{stats.streak}</span></div>
+                    </div>
+                    <p className="text-xs text-stone-400">Bu istatistikler sadece bu cihaza özeldir.</p>
+                </div>
+
+                {/* Premium Plans (Visible for Guest) */}
+                <PremiumPlansSection />
+
+                 {/* Support Section (Visible for Guest) */}
+                 <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+                    <button className="w-full p-4 flex items-center justify-between hover:bg-rose-50/50 transition-colors text-left group">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors"><Heart size={18} fill="currentColor" /></div>
+                            <div>
+                                <span className="text-sm font-bold text-rose-600 block">Geliştiriciye Destek Ol</span>
+                                <span className="text-xs text-rose-400">Sadaka-i Cariye / Bağış</span>
+                            </div>
+                        </div>
+                        <div className="bg-rose-100 text-rose-600 px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+                            <Coffee size={12} /> Ismarla
+                        </div>
+                    </button>
+                </div>
+
+                {/* Locked Sections */}
+                <div className="space-y-3">
+                    <div className="flex items-center gap-4 p-4 bg-white border border-stone-100 rounded-xl opacity-60 grayscale">
+                        <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-400"><Award size={20} /></div>
+                        <div className="flex-1"><h4 className="font-bold text-stone-700">Başarılar</h4><p className="text-xs text-stone-400">Giriş yapınca açılır</p></div>
+                        <Lock size={16} className="text-stone-300" />
+                    </div>
+                    <div className="flex items-center gap-4 p-4 bg-white border border-stone-100 rounded-xl opacity-60 grayscale">
+                        <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-400"><Settings size={20} /></div>
+                        <div className="flex-1"><h4 className="font-bold text-stone-700">Ayarlar</h4><p className="text-xs text-stone-400">Giriş yapınca açılır</p></div>
+                        <Lock size={16} className="text-stone-300" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+  }
+
+  // Logged In View
   return (
-    <div className="flex flex-col h-full bg-stone-50 animate-fade-in scrollbar-hide">
+    <div className="flex flex-col min-h-full bg-stone-50 animate-fade-in scrollbar-hide">
        {/* Header Revised */}
-       <div className="relative bg-gradient-to-br from-[#0F5132] to-[#064e3b] text-white pt-12 pb-20 px-6 rounded-b-[40px] shadow-2xl overflow-hidden">
+       <div className="relative bg-gradient-to-br from-[#0F5132] to-[#064e3b] text-white pt-12 pb-36 px-6 rounded-b-[40px] shadow-2xl overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute inset-0 islamic-pattern opacity-10"></div>
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
@@ -636,8 +1044,8 @@ function ProfileScreen({ stats }) {
        </div>
 
        {/* Stats Grid Revised */}
-       <div className="px-6 -mt-12 relative z-20 mb-8">
-          <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-stone-100 flex justify-between items-center">
+       <div className="px-6 -mt-16 relative z-20 mb-8">
+          <div className="bg-white p-5 rounded-3xl shadow-xl border border-stone-100 flex justify-between items-center">
              <div className="flex-1 flex flex-col items-center gap-1.5 group cursor-default">
                 <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:scale-110 transition-transform duration-300 shadow-sm"><Star size={24} fill="currentColor" className="drop-shadow-sm" /></div>
                 <span className="font-bold text-stone-800 text-xl tracking-tight mt-1">{stats.points}</span>
@@ -660,35 +1068,40 @@ function ProfileScreen({ stats }) {
 
        {/* Content */}
        <div className="p-6 space-y-8 pb-24 pt-0">
+          
+          {/* PREMIUM PLANS (Reusable) */}
+          <PremiumPlansSection />
+
           {/* Achievements */}
           <div>
              <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-stone-800 flex items-center gap-2 text-lg"><Award size={20} className="text-[#0F5132]"/> Başarılar</h3>
-                <button className="text-xs font-bold text-stone-400 hover:text-[#0F5132] transition-colors">Tümünü Gör</button>
+                <button onClick={() => setShowAchievementsModal(true)} className="text-xs font-bold text-stone-400 hover:text-[#0F5132] transition-colors">Tümünü Gör</button>
              </div>
              
+             {/* Horizontal Scroll (Top 5) */}
              <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
-                <div className="min-w-[120px] bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-100 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm group hover:shadow-md transition-shadow cursor-pointer">
-                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">🚀</div>
-                   <div>
-                       <span className="text-sm font-bold text-stone-800 block">Hızlı Başlangıç</span>
-                       <span className="text-[10px] text-stone-500 font-medium">İlk 100 Puan</span>
-                   </div>
-                </div>
-                <div className="min-w-[120px] bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm group hover:shadow-md transition-shadow cursor-pointer">
-                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">📖</div>
-                   <div>
-                       <span className="text-sm font-bold text-stone-800 block">İlk Ders</span>
-                       <span className="text-[10px] text-stone-500 font-medium">Elif-Ba Tamamlandı</span>
-                   </div>
-                </div>
-                <div className="min-w-[120px] bg-stone-50 border border-stone-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center opacity-60 grayscale group hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
-                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-stone-300 shadow-sm"><Lock size={24} /></div>
-                   <div>
-                       <span className="text-sm font-bold text-stone-400 block">7 Gün Seri</span>
-                       <span className="text-[10px] text-stone-400 font-medium">Kilitli</span>
-                   </div>
-                </div>
+                {ALL_ACHIEVEMENTS.slice(0, 5).map(ach => (
+                    <div key={ach.id} className={`min-w-[140px] border rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm group transition-all relative overflow-hidden ${ach.status === 'locked' ? 'bg-stone-50 border-stone-200 opacity-80' : `bg-gradient-to-br ${ach.color} ${ach.borderColor}`}`}>
+                        {ach.status !== 'completed' && ach.status !== 'locked' && (
+                            <div className="absolute bottom-0 left-0 h-1 bg-stone-200 w-full">
+                                <div className="h-full bg-emerald-500" style={{ width: `${(ach.current / ach.target) * 100}%` }}></div>
+                            </div>
+                        )}
+
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-sm ${ach.status === 'locked' ? 'bg-white text-stone-300 grayscale' : 'bg-white group-hover:scale-110 transition-transform'}`}>
+                            {ach.status === 'locked' ? <Lock size={20} /> : ach.icon}
+                        </div>
+                        
+                        <div>
+                            <span className={`text-sm font-bold block leading-tight mb-1 ${ach.status === 'locked' ? 'text-stone-500' : 'text-stone-800'}`}>{ach.title}</span>
+                            <span className="text-[10px] text-stone-400 font-medium block leading-tight">{ach.desc}</span>
+                            {ach.status !== 'completed' && ach.target && (
+                                <span className="text-[10px] text-emerald-600 font-bold mt-1 block">{ach.current}/{ach.target}</span>
+                            )}
+                        </div>
+                    </div>
+                ))}
              </div>
           </div>
 
@@ -716,399 +1129,64 @@ function ProfileScreen({ stats }) {
                    </div>
                    <div className="w-11 h-6 bg-emerald-500 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div></div>
                 </div>
-                <button className="w-full p-4 flex items-center justify-between hover:bg-rose-50/50 transition-colors text-left group">
+                
+                {/* NEW: Support / Sadaka-i Cariye Option */}
+                <button className="w-full p-4 flex items-center justify-between hover:bg-rose-50/50 transition-colors text-left group border-t border-stone-100">
                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors"><LogOut size={18} /></div>
-                      <span className="text-sm font-bold text-rose-600">Çıkış Yap</span>
+                      <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors"><Heart size={18} fill="currentColor" /></div>
+                      <div>
+                          <span className="text-sm font-bold text-rose-600 block">Geliştiriciye Destek Ol</span>
+                          <span className="text-xs text-rose-400">Sadaka-i Cariye / Bağış</span>
+                      </div>
                    </div>
-                   <ArrowRight size={18} className="text-stone-300 group-hover:text-rose-300 transition-colors" />
+                   <div className="bg-rose-100 text-rose-600 px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+                      <Coffee size={12} /> Ismarla
+                   </div>
+                </button>
+
+                <button onClick={onLogout} className="w-full p-4 flex items-center justify-between hover:bg-stone-50 transition-colors text-left group border-t border-stone-100">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center group-hover:bg-stone-200 transition-colors"><LogOut size={18} /></div>
+                      <span className="text-sm font-bold text-stone-500">Çıkış Yap</span>
+                   </div>
+                   <ArrowRight size={18} className="text-stone-300 group-hover:text-stone-400 transition-colors" />
                 </button>
              </div>
           </div>
        </div>
-    </div>
-  );
-}
 
-function ElifBaTree({ startLevelFlow, onBack, completedLevels, stats }) {
-  const allLevelsOrder = CURRICULUM.flatMap(u => u.levels.map(l => l.id));
-
-  return (
-    <div className="flex flex-col min-h-full pb-12 bg-stone-50">
-      <div className="px-4 py-4 bg-white sticky top-0 z-40 shadow-sm flex items-center justify-between">
-         <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-full transition-colors"><ArrowLeft size={24} className="text-stone-500" /></button>
-            <h2 className="text-xl font-bold text-stone-800">Dersler</h2>
-         </div>
-         <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 min-w-[60px] justify-center">
-                <Heart size={18} className="text-rose-500 fill-rose-500" />
-                <span className="font-bold text-rose-600 text-sm">{stats.hearts}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-orange-50 px-2 py-1 rounded-lg border border-orange-100">
-                <Flame size={18} className="text-orange-500 fill-orange-500" />
-                <span className="font-bold text-orange-600 text-sm">{stats.streak}</span>
-            </div>
-         </div>
-      </div>
-      <div className="flex-1 flex flex-col items-center w-full animate-fade-in pb-10 mt-4">
-        {CURRICULUM.map((unit) => (
-          <div key={unit.id} className="w-full relative px-4 mb-8">
-            <div className={`w-full p-5 rounded-2xl ${unit.color} text-white shadow-lg flex justify-between items-center mb-8 relative overflow-hidden`}>
-               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-4 -mt-4"></div>
-               <div className="relative z-10"><h3 className="font-bold text-xl">{unit.title}</h3><p className="text-white/80 text-xs mt-1">{unit.desc}</p></div>
-               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm"><BookOpen size={20} /></div>
-            </div>
-            <div className="relative w-full max-w-sm mx-auto flex flex-col items-center gap-8">
-              {unit.levels.map((level, lIdx) => {
-                const currentLevelGlobalIndex = allLevelsOrder.indexOf(level.id);
-                const prevLevelId = currentLevelGlobalIndex > 0 ? allLevelsOrder[currentLevelGlobalIndex - 1] : null;
-                const isLocked = false; 
-                const isCompleted = completedLevels.includes(level.id);
-                const isActive = !isLocked && !isCompleted;
-                const offset = (lIdx % 2 === 0) ? -30 : 30;
-                const isQuiz = level.type.startsWith('quiz');
-
-                return (
-                  <div key={level.id} className="relative z-0 transform transition-transform hover:scale-105" style={{ transform: `translateX(${isQuiz ? 0 : offset}px)` }}>
-                    <button 
-                      onClick={() => (!isLocked && stats.hearts > 0) ? startLevelFlow(level) : null}
-                      disabled={isLocked || stats.hearts === 0}
-                      className={`w-20 h-20 rounded-full flex items-center justify-center border-[6px] shadow-xl transition-all relative overflow-hidden ${isLocked ? 'bg-stone-200 border-stone-300 text-stone-400 cursor-not-allowed grayscale' : isCompleted ? 'bg-[#ffd700] border-orange-300 text-white' : isQuiz ? `bg-white border-rose-500 text-rose-500` : `bg-white border-[#20c997] text-[#0F5132]`}`}
-                    >
-                        {isLocked ? <Lock size={28} /> : isCompleted ? <CheckCircle size={32} fill="white" className="text-orange-500" /> : isQuiz ? <Trophy size={32} fill="currentColor" className="animate-pulse" /> : <Star size={32} fill="currentColor" />}
-                    </button>
-                    {!isLocked && <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-lg shadow-sm border border-stone-100 whitespace-nowrap z-20"><span className="text-[10px] font-bold uppercase text-stone-600">{level.label}</span></div>}
-                    {isActive && stats.hearts > 0 && (
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 flex items-center animate-bounce z-20 pointer-events-none">
-                            <div className="w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-[#0F5132] mr-[-1px]"></div>
-                            <div className="bg-[#0F5132] text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-lg border border-white/20 whitespace-nowrap tracking-wider">BAŞLA</div>
+       {/* All Achievements Modal */}
+       {showAchievementsModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
+           <div className="bg-white w-full max-w-md h-[80vh] rounded-3xl p-6 overflow-y-auto relative animate-fade-in-up flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 py-2 border-b border-stone-100">
+                 <h3 className="text-xl font-bold text-stone-800 flex items-center gap-2"><Award className="text-[#0F5132]" /> Tüm Başarılar</h3>
+                 <button onClick={() => setShowAchievementsModal(false)} className="bg-stone-100 p-2 rounded-full hover:bg-stone-200"><X size={20} /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pb-4">
+                 {ALL_ACHIEVEMENTS.map(ach => (
+                    <div key={ach.id} className={`border rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm relative overflow-hidden ${ach.status === 'locked' ? 'bg-stone-50 border-stone-200 opacity-80' : `bg-gradient-to-br ${ach.color} ${ach.borderColor}`}`}>
+                        {/* ... Achievement Card Content ... */}
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-sm ${ach.status === 'locked' ? 'bg-white text-stone-300 grayscale' : 'bg-white'}`}>
+                            {ach.status === 'locked' ? <Lock size={20} /> : ach.icon}
                         </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function UnitIntroScreen({ lessonData, onStartLesson, onBack }) {
-  const isPositionLesson = lessonData.levelInfo.type.startsWith('position');
-  const isHarekeLesson = lessonData.levelInfo.type.startsWith('hareke');
-  const isQuiz = lessonData.levelInfo.type.startsWith('quiz');
-  const lettersToShow = (isPositionLesson || isHarekeLesson) ? (lessonData.letters && lessonData.letters.length > 0 ? lessonData.letters : ALPHABET.filter(l => l.group === lessonData.levelInfo.group)) : (lessonData.letters || []);
-
-  return (
-    <div className="flex flex-col h-full bg-stone-50 animate-fade-in scrollbar-hide">
-        <div className="px-4 py-4 bg-white sticky top-0 z-10 shadow-sm flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-full transition-colors"><ArrowLeft size={24} className="text-stone-500" /></button>
-            <h2 className="text-xl font-bold text-stone-800">{isQuiz ? "Ünite Sınavı" : "Ders Hazırlığı"}</h2>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-6 flex items-start gap-3">
-                <Info className="text-emerald-600 flex-shrink-0 mt-1" size={20} />
-                <div>
-                    <h3 className="font-bold text-emerald-800 text-sm mb-1">{isQuiz ? "Sınav Hakkında" : "Ders İçeriği"}</h3>
-                    <p className="text-emerald-700 text-xs">
-                        {isQuiz ? "Bu sınavda ünitede öğrendiğiniz tüm konular test edilecektir. Başarılar!" : isPositionLesson ? "Aşağıdaki tabloda bu gruptaki harflerin kelime başı, ortası ve sonundaki değişimlerini inceleyebilirsiniz." : isHarekeLesson ? "Harekeler, harflerin nasıl okunacağını belirler. Üstün (E/A), Esre (İ/I) ve Ötre (Ü/U) sesleri verir." : `Bu bölümde ${lessonData.levelInfo.label} konusunu işleyeceğiz.`}
-                    </p>
-                </div>
-            </div>
-
-            {!isQuiz && (
-                isHarekeLesson ? (
-                    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden mb-4">
-                        <div className="grid grid-cols-4 gap-1 bg-stone-50 p-3 text-center text-[10px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-100 sticky top-0"><div>Harf</div><div>Üstün</div><div>Esre</div><div>Ötre</div></div>
-                        <div className="divide-y divide-stone-100">
-                            {lettersToShow.map((l) => {
-                                const soundUstun = (l.latin || "") + (l.isThick ? "A" : "E");
-                                const soundEsre = (l.latin || "") + (l.isThick ? "I" : "İ");
-                                const soundOtre = (l.latin || "") + (l.isThick ? "U" : "Ü");
-                                return (
-                                    <div key={l.id} className="grid grid-cols-4 gap-1 items-center text-center py-4 hover:bg-emerald-50/30 transition-colors">
-                                        <div className="text-2xl font-serif text-stone-800">{l.char}</div>
-                                        <div className="flex flex-col items-center justify-center"><div className="text-2xl font-serif text-[#0F5132]">{l.char}َ</div><div className="text-[10px] font-bold text-stone-400 opacity-60 uppercase tracking-wide">{soundUstun}</div></div>
-                                        <div className="flex flex-col items-center justify-center"><div className="text-2xl font-serif text-[#0F5132]">{l.char}ِ</div><div className="text-[10px] font-bold text-stone-400 opacity-60 uppercase tracking-wide">{soundEsre}</div></div>
-                                        <div className="flex flex-col items-center justify-center"><div className="text-2xl font-serif text-[#0F5132]">{l.char}ُ</div><div className="text-[10px] font-bold text-stone-400 opacity-60 uppercase tracking-wide">{soundOtre}</div></div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ) : isPositionLesson ? (
-                    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden mb-4">
-                        <div className="grid grid-cols-5 gap-1 bg-stone-50 p-3 text-center text-[10px] font-bold text-stone-500 uppercase tracking-wider border-b border-stone-100 sticky top-0"><div>Harf</div><div>Yalın</div><div>Başta</div><div>Ortada</div><div>Sonda</div></div>
-                        <div className="divide-y divide-stone-100">
-                            {lettersToShow.map((l) => (
-                                <div key={l.id} className="grid grid-cols-5 gap-1 items-center text-center py-3 hover:bg-emerald-50/30 transition-colors">
-                                    <div className="text-xs font-bold text-stone-600">{l.name}</div>
-                                    <div className="font-serif text-xl text-stone-800">{l.char}</div>
-                                    <div className="font-serif text-xl text-[#0F5132]">{l.char}ـ</div>
-                                    <div className="font-serif text-xl text-[#0F5132]">ـ{l.char}ـ</div>
-                                    <div className="font-serif text-xl text-[#0F5132]">ـ{l.char}</div>
+                        
+                        <div>
+                            <span className={`text-sm font-bold block leading-tight mb-1 ${ach.status === 'locked' ? 'text-stone-500' : 'text-stone-800'}`}>{ach.title}</span>
+                            <span className="text-[10px] text-stone-500 font-medium block leading-tight">{ach.desc}</span>
+                            {ach.status !== 'completed' && ach.target && (
+                                <div className="mt-2 bg-white/50 px-2 py-0.5 rounded-md inline-block">
+                                    <span className="text-[10px] text-emerald-700 font-bold">{ach.current}/{ach.target}</span>
                                 </div>
-                            ))}
+                            )}
+                            {ach.status === 'completed' && <span className="text-[10px] text-emerald-600 font-bold mt-2 block bg-white/50 px-2 py-0.5 rounded-md">Tamamlandı!</span>}
                         </div>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                        {lettersToShow.map((letter) => (
-                            <div key={letter.id} className={`bg-white p-4 rounded-xl border-2 flex flex-col items-center justify-center gap-2 shadow-sm ${letter.isThick ? 'border-amber-200 bg-amber-50/50' : 'border-stone-100'}`}>
-                                <div className="text-6xl font-serif text-stone-800">{letter.char}</div>
-                                <div className="text-center"><p className="font-bold text-stone-900">{letter.name}</p>{letter.isThick && <span className="inline-block mt-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">KALIN</span>}</div>
-                            </div>
-                        ))}
-                    </div>
-                )
-            )}
+                 ))}
+              </div>
+           </div>
         </div>
-        <div className="p-6 bg-white border-t border-stone-100">
-            <button onClick={onStartLesson} className="w-full bg-[#0F5132] hover:bg-[#0a3622] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                {isQuiz ? "Sınava Başla" : "Derse Başla"} <ArrowRight size={20} />
-            </button>
-        </div>
-    </div>
-  );
-}
-
-function LessonScreen({ lessonData, onComplete, onExit, loseHeart, hearts, timeToNextHeart }) {
-  const [questionsQueue, setQuestionsQueue] = useState(lessonData.questions);
-  const [qIndex, setQIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [feedback, setFeedback] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hint, setHint] = useState(null);
-  const [loadingHint, setLoadingHint] = useState(false);
-  
-  const currentQ = questionsQueue[qIndex];
-  // Calculate progress safely
-  const progress = questionsQueue.length > 0 ? (qIndex / questionsQueue.length) * 100 : 0;
-
-  const playAudio = () => { setIsPlaying(true); setTimeout(() => setIsPlaying(false), 1000); };
-  
-  useEffect(() => { 
-      if (currentQ && (currentQ.type === 'audio_match' || !currentQ.mainVisual)) {
-          playAudio(); 
-      }
-      setHint(null); 
-  }, [qIndex, currentQ]);
-
-  const getAIHint = async () => {
-    if (loadingHint || hint) return;
-    setLoadingHint(true);
-    const lName = currentQ.letterName || "Bilinmeyen";
-    const lChar = currentQ.letterChar || "?";
-    const prompt = `Harf/Kelime: ${lName} (${lChar}). Mahreci veya okunuşu hakkında kısa bilgi ver.`;
-    const hintText = await callGemini(prompt);
-    setHint(hintText);
-    setLoadingHint(false);
-  };
-
-  const handleCheck = () => {
-    if (!selectedOption) return;
-    if (selectedOption === currentQ.correctId) { setFeedback('correct'); } 
-    else { setFeedback('wrong'); loseHeart(); setQuestionsQueue(prev => [...prev, { ...currentQ, id: currentQ.id + '_retry' }]); }
-  };
-
-  const handleNext = () => {
-    setFeedback(null); setSelectedOption(null);
-    if (qIndex < questionsQueue.length - 1) setQIndex(qIndex + 1); else onComplete(20);
-  };
-
-  if (!currentQ) return null;
-
-  if (hearts === 0) return <div className="h-full flex flex-col items-center justify-center bg-stone-900 text-white p-8 text-center"><Heart size={80} className="text-stone-700 mb-6" /><h2 className="text-3xl font-bold mb-2">Canın Kalmadı!</h2><p className="text-stone-400 mb-8">{formatTime(timeToNextHeart)} sonra dolacak.</p><button onClick={onExit} className="w-full bg-stone-700 py-4 rounded-xl font-bold">Çıkış</button></div>;
-
-  return (
-    <div className="flex flex-col h-full bg-white relative animate-fade-in scrollbar-hide">
-      <div className="px-4 py-6 flex items-center gap-4">
-        <button onClick={onExit}><X size={24} className="text-stone-400" /></button>
-        <div className="flex-1 h-4 bg-stone-100 rounded-full overflow-hidden"><div className="h-full bg-[#0F5132] transition-all duration-500" style={{ width: `${progress}%` }}></div></div>
-        <div className="flex items-center gap-1"><Heart size={24} className="text-rose-500 fill-rose-500" /><span className="font-bold text-rose-500 text-xl">{hearts}</span></div>
-      </div>
-      <div className="flex-1 p-6 flex flex-col items-center justify-center relative">
-        <button onClick={getAIHint} className="absolute top-4 right-4 flex items-center gap-2 text-xs font-bold text-[#0F5132] bg-emerald-50 px-3 py-2 rounded-xl"><Sparkles size={16} />{loadingHint ? "..." : "İpucu"}</button>
-        {hint && <div className="mb-6 bg-white border-2 border-emerald-100 p-4 rounded-2xl text-sm text-stone-700 max-w-xs">{hint}</div>}
-        <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">{currentQ.prompt}</h2>
-        
-        {currentQ.mainVisual ? (
-            <div className="w-full max-w-[280px] h-64 bg-emerald-50 rounded-3xl border-4 border-emerald-100 flex items-center justify-center mb-10 shadow-sm px-4 overflow-hidden">
-                <span className={`font-serif text-stone-800 text-center leading-relaxed ${currentQ.mainVisual.length > 6 ? 'text-6xl' : 'text-8xl'}`}>
-                    {currentQ.mainVisual}
-                </span>
-            </div>
-        ) : (
-            <button onClick={playAudio} className={`w-32 h-32 rounded-3xl shadow-lg flex items-center justify-center text-white mb-10 transition-all ${isPlaying ? 'bg-[#0F5132] scale-105' : 'bg-[#20c997] hover:bg-[#1baa80]'}`}><Volume2 size={48} /></button>
-        )}
-
-        <div className="grid grid-cols-2 gap-4 w-full">
-          {currentQ.options.map((opt) => (
-            <button 
-                key={opt.id} 
-                onClick={() => !feedback && setSelectedOption(opt.id)} 
-                className={`aspect-square rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${selectedOption === opt.id ? 'border-[#0F5132] bg-emerald-50 text-[#0F5132]' : 'border-stone-200 bg-white text-stone-700'} ${feedback === 'correct' && opt.id === currentQ.correctId ? '!bg-emerald-100 !border-emerald-600 !text-emerald-800' : ''} ${feedback === 'wrong' && opt.id === selectedOption ? '!bg-rose-100 !border-rose-500 !text-rose-700' : ''}`}
-            >
-                {opt.isTextAnswer ? (
-                    <span className="text-3xl font-bold">{opt.text}</span>
-                ) : (
-                    <>
-                        <span className="text-5xl font-serif mb-2">{opt.char}</span>
-                        {opt.text && <span className="text-lg font-bold opacity-40">{opt.text}</span>}
-                    </>
-                )}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className={`p-6 border-t ${feedback ? (feedback === 'correct' ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100') : 'bg-white border-stone-100'}`}>
-        {feedback ? (
-          <div className="flex items-center justify-between"><div className="flex items-center gap-4"><div className={`w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-sm ${feedback === 'correct' ? 'text-emerald-500' : 'text-rose-500'}`}>{feedback === 'correct' ? <CheckCircle size={32} /> : <RefreshCw size={32} />}</div><div><h4 className={`font-bold text-lg ${feedback === 'correct' ? 'text-emerald-800' : 'text-rose-800'}`}>{feedback === 'correct' ? 'Harika!' : 'Hata'}</h4></div></div><button onClick={handleNext} className={`px-8 py-3 rounded-xl font-bold text-white shadow-md ${feedback === 'correct' ? 'bg-[#0F5132]' : 'bg-rose-500'}`}>DEVAM</button></div>
-        ) : (
-          <button onClick={handleCheck} disabled={!selectedOption} className={`w-full py-4 rounded-xl font-bold text-white text-lg shadow-md ${selectedOption ? 'bg-[#0F5132]' : 'bg-stone-200 cursor-not-allowed'}`}>KONTROL ET</button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function GeminiChatScreen({ onBack }) {
-  const [messages, setMessages] = useState([{ id: 1, sender: 'bot', text: 'Selamünaleyküm! Ben Bilge Hoca.' }]);
-  const [inputText, setInputText] = useState('');
-  const handleSend = async () => { if(!inputText.trim()) return; setMessages(p => [...p, {id: Date.now(), sender:'user', text:inputText}]); setInputText(''); const res = await callGemini(inputText); setMessages(p => [...p, {id: Date.now()+1, sender:'bot', text:res}]); };
-  return (
-    <div className="flex flex-col h-full bg-stone-50 scrollbar-hide">
-      <div className="px-4 py-4 bg-white sticky top-0 z-10 shadow-sm flex items-center gap-3"><button onClick={onBack}><ArrowLeft className="text-stone-500" /></button><h2 className="text-lg font-bold text-stone-800">Bilge Hoca</h2></div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">{messages.map(m => <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[80%] p-3 rounded-2xl text-sm ${m.sender === 'user' ? 'bg-[#0F5132] text-white' : 'bg-white border text-stone-800'}`}>{m.text}</div></div>)}</div>
-      <div className="p-4 bg-white border-t flex gap-2"><input value={inputText} onChange={e=>setInputText(e.target.value)} className="flex-1 border rounded-xl px-4 py-2" placeholder="Sor..." /><button onClick={handleSend} className="bg-[#0F5132] text-white p-2 rounded-xl"><Send /></button></div>
-    </div>
-  );
-}
-
-function ZikirmatikScreen({ onBack }) {
-    const [count, setCount] = useState(0);
-    return (
-        <div className="flex flex-col h-full bg-[#0F5132] text-white relative overflow-hidden">
-            <div className="absolute inset-0 islamic-pattern opacity-10"></div>
-            <div className="relative z-10 flex flex-col h-full p-6">
-                <div className="pt-6 flex items-center justify-between"><button onClick={onBack} className="p-2 bg-white/10 rounded-full"><ArrowLeft /></button><h2 className="text-xl font-bold">Zikirmatik</h2><button onClick={() => setCount(0)} className="p-2 bg-white/10 rounded-full"><RotateCcw /></button></div>
-                <div className="flex-1 flex flex-col items-center justify-center gap-8"><div className="w-64 h-24 bg-black/40 rounded-xl flex items-center justify-center text-6xl font-mono">{count}</div><button onClick={() => setCount(c => c + 1)} className="w-48 h-48 rounded-full bg-[#20c997] shadow-xl border-8 border-white/20 active:scale-95"></button></div>
-            </div>
-        </div>
-    );
-}
-
-function SurahDetail({ surah, onBack }) {
-  const [versesData, setVersesData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSurahDetails = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,tr.diyanet`);
-        const data = await response.json();
-        if (data.code === 200 && data.data.length === 2) {
-          const arabicVerses = data.data[0].ayahs;
-          const turkishVerses = data.data[1].ayahs;
-          const combined = arabicVerses.map((ayah, index) => ({
-            number: ayah.numberInSurah,
-            arabic: ayah.text,
-            turkish: turkishVerses[index] ? turkishVerses[index].text : "Meal bulunamadı",
-            audio: ayah.audio 
-          }));
-          setVersesData(combined);
-        }
-      } catch (error) {
-        console.error("Sure detayları alınamadı:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSurahDetails();
-  }, [surah]);
-
-  return (
-    <div className="flex flex-col h-full bg-stone-50 animate-fade-in">
-      <div className="px-4 py-4 bg-white sticky top-0 z-20 shadow-sm flex items-center justify-between border-b border-stone-100">
-         <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-full transition-colors"><ArrowLeft size={24} className="text-stone-600" /></button>
-            <div><h2 className="text-lg font-bold text-stone-800">{surah.name} Suresi</h2><p className="text-xs text-stone-500">{surah.englishNameTranslation} • {surah.numberOfAyahs} Ayet</p></div>
-         </div>
-         <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-700 font-bold border border-emerald-100">{surah.number}</div>
-      </div>
-      <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
-         {loading ? (
-            <div className="flex flex-col items-center justify-center h-64 gap-4"><Loader2 size={32} className="animate-spin text-emerald-600" /><p className="text-sm text-stone-400">Ayetler Diyanet'ten alınıyor...</p></div>
-         ) : (
-            <div className="space-y-6 pb-20">
-               {surah.number !== 9 && (<div className="text-center py-6"><span className="text-3xl font-serif text-stone-800">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span></div>)}
-               {versesData.map((verse) => (
-                  <div key={verse.number} className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm">
-                     <div className="flex justify-between items-start gap-4 mb-4">
-                        <div className="w-8 h-8 flex-shrink-0 bg-stone-100 rounded-full flex items-center justify-center text-xs font-bold text-stone-500 mt-1">{verse.number}</div>
-                        <p className="text-right text-2xl font-serif leading-loose text-stone-800" dir="rtl">{verse.arabic}</p>
-                     </div>
-                     <div className="pt-4 border-t border-stone-50"><p className="text-stone-600 text-sm leading-relaxed">{verse.turkish}</p></div>
-                  </div>
-               ))}
-            </div>
-         )}
-      </div>
-    </div>
-  );
-}
-
-function QuranScreen({ onBack }) {
-  const [surahs, setSurahs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSurah, setSelectedSurah] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const fetchSurahs = async () => {
-      try {
-        const response = await fetch('https://api.alquran.cloud/v1/surah');
-        const data = await response.json();
-        if (data.code === 200) { setSurahs(data.data); }
-      } catch (error) { console.error("Sure listesi alınamadı:", error); } finally { setLoading(false); }
-    };
-    fetchSurahs();
-  }, []);
-
-  const filteredSurahs = surahs.filter(s => s.englishName.toLowerCase().includes(searchQuery.toLowerCase()) || s.englishNameTranslation.toLowerCase().includes(searchQuery.toLowerCase()) || String(s.number).includes(searchQuery));
-
-  if (selectedSurah) { return <SurahDetail surah={selectedSurah} onBack={() => setSelectedSurah(null)} />; }
-
-  return (
-    <div className="flex flex-col h-full bg-stone-50 animate-fade-in">
-       <div className="px-6 py-6 bg-[#0F5132] text-white sticky top-0 z-10 shadow-lg rounded-b-[30px]">
-            <div className="flex items-center gap-4 mb-6"><button onClick={onBack} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"><ArrowLeft size={24} /></button><h1 className="text-2xl font-bold">Kuran-ı Kerim</h1></div>
-            <div className="relative">
-                <input type="text" placeholder="Sure ara (Örn: Fatiha)..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                <div className="absolute left-3 top-3.5 text-white/50"><BookOpen size={18} /></div>
-            </div>
-       </div>
-       <div className="flex-1 overflow-y-auto p-4 pt-6 scrollbar-hide">
-          {loading ? (
-             <div className="flex justify-center pt-20"><Loader2 className="animate-spin text-emerald-600" size={32} /></div>
-          ) : (
-             <div className="space-y-3 pb-20">
-                {filteredSurahs.map((surah) => (
-                   <div key={surah.number} onClick={() => setSelectedSurah(surah)} className="bg-white p-4 rounded-xl border border-stone-100 shadow-sm flex items-center justify-between hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer group">
-                      <div className="flex items-center gap-4">
-                         <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-700 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-colors">{surah.number}</div>
-                         <div><h3 className="font-bold text-stone-800">{surah.englishName}</h3><p className="text-xs text-stone-500">{surah.englishNameTranslation} • {surah.numberOfAyahs} Ayet</p></div>
-                      </div>
-                      <div className="text-right"><span className="font-serif text-xl text-stone-800 group-hover:text-emerald-600 transition-colors">{surah.name.replace('سورة', '')}</span></div>
-                   </div>
-                ))}
-             </div>
-          )}
-       </div>
+       )}
     </div>
   );
 }
@@ -1120,6 +1198,14 @@ function DashboardContent({ setView, completedLevels }) {
   const [nextPrayer, setNextPrayer] = useState({ name: 'Vakit', remaining: 0 });
   const [locationInfo, setLocationInfo] = useState({ city: "İstanbul", weather: "Parçalı Bulutlu 24°C" });
   const [loading, setLoading] = useState(false);
+  const [dailyHadith, setDailyHadith] = useState(null);
+
+  // Set Daily Hadith based on day of year
+  useEffect(() => {
+    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    const hadith = HADITHS_DATABASE[dayOfYear % HADITHS_DATABASE.length];
+    setDailyHadith(hadith);
+  }, []);
 
   useEffect(() => {
     const fetchData = async (lat, lon) => {
@@ -1285,13 +1371,17 @@ function DashboardContent({ setView, completedLevels }) {
          <h3 className="font-bold text-[#0F5132] mb-4 text-sm px-1">Günün Hadisi</h3>
          <div className="bg-rose-50 p-5 rounded-2xl border border-rose-100 relative">
             <Quote className="absolute top-4 right-4 text-rose-200" size={40} />
-            <p className="text-sm font-medium text-stone-700 italic leading-relaxed relative z-10">
-                "Kolaylaştırınız, zorlaştırmayınız; müjdeleyiniz, nefret ettirmeyiniz."
-            </p>
-            <div className="mt-3 flex items-center gap-2">
-                <div className="w-6 h-6 bg-rose-200 rounded-full flex items-center justify-center text-rose-700 text-xs font-bold">Hz</div>
-                <span className="text-xs font-bold text-rose-700">Muhammed (s.a.v)</span>
-            </div>
+            {dailyHadith && (
+                <>
+                <p className="text-sm font-medium text-stone-700 italic leading-relaxed relative z-10">
+                    "{dailyHadith.text}"
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                    <div className="w-6 h-6 bg-rose-200 rounded-full flex items-center justify-center text-rose-700 text-xs font-bold"><Info size={12} /></div>
+                    <span className="text-xs font-bold text-rose-700">{dailyHadith.source}</span>
+                </div>
+                </>
+            )}
          </div>
       </div>
     </div>
@@ -1300,7 +1390,7 @@ function DashboardContent({ setView, completedLevels }) {
 
 // --- 6. UYGULAMA GİRİŞ NOKTASI (EN SONDA) ---
 
-function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels }) {
+function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels, user, onLoginClick, onLogout }) {
   const isDashboard = view === 'dashboard';
 
   return (
@@ -1312,7 +1402,7 @@ function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels }
         {view === 'zikirmatik' && <ZikirmatikScreen onBack={() => setView('dashboard')} />}
         {view === 'qibla' && <QiblaScreen onBack={() => setView('dashboard')} />}
         {view === 'saves' && <div className="p-8 text-center text-stone-500">Ezberler (Yakında)</div>}
-        {view === 'profile' && <ProfileScreen stats={stats} />}
+        {view === 'profile' && <ProfileScreen stats={stats} user={user} onLoginClick={onLoginClick} onLogout={onLogout} />}
         {view === 'chat' && <GeminiChatScreen onBack={() => setView('dashboard')} />}
       </main>
 
@@ -1346,7 +1436,9 @@ export default function App() {
   const [points, setPoints] = useState(1240);
   const [appView, setAppView] = useState('dashboard');
   const [activeLesson, setActiveLesson] = useState(null);
-  const [completedLevels, setCompletedLevels] = useState([]); 
+  const [completedLevels, setCompletedLevels] = useState([]);
+  const [user, setUser] = useState(null); // null means guest
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     if (currentScreen === 'splash') {
@@ -1394,18 +1486,34 @@ export default function App() {
     setCurrentScreen('app');
   };
 
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setShowAuthModal(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'splash': return <SplashScreen />;
-      case 'auth': return <AuthScreen onLoginSuccess={() => setCurrentScreen('app')} />;
       case 'app': 
-        return <MainAppLayout 
-                  view={appView} 
-                  setView={setAppView} 
-                  stats={{ hearts, streak, points, timeToNextHeart }} 
-                  startLevelFlow={startLevelFlow}
-                  completedLevels={completedLevels} 
-                />;
+        return (
+          <>
+            <MainAppLayout 
+                view={appView} 
+                setView={setAppView} 
+                stats={{ hearts, streak, points, timeToNextHeart }} 
+                startLevelFlow={startLevelFlow}
+                completedLevels={completedLevels}
+                user={user}
+                onLoginClick={() => setShowAuthModal(true)}
+                onLogout={handleLogout}
+            />
+            {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onLogin={handleLogin} />}
+          </>
+        );
       case 'unit_intro':
         return <UnitIntroScreen 
                   lessonData={activeLesson}
