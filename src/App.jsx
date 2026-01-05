@@ -216,6 +216,7 @@ const CURRICULUM = [
 const generateLesson = (levelConfig) => {
   let questions = [];
   let lessonTitle = "";
+  let lettersInUnit = []; // FIX: Değişkeni burada tanımladık
   
   if (levelConfig.type === 'combination_easy' || levelConfig.type === 'combination_hard') {
       lessonTitle = levelConfig.label;
@@ -337,7 +338,7 @@ const generateLesson = (levelConfig) => {
   }
 
   if (levelConfig.type === 'letters') {
-    let lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
+    lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
     lessonTitle = `${levelConfig.label} Harfleri`;
     lettersInUnit.forEach(target => {
       const otherLetters = ALPHABET.filter(l => l.id !== target.id);
@@ -354,7 +355,7 @@ const generateLesson = (levelConfig) => {
   } 
   else if (levelConfig.type === 'position_group') {
     lessonTitle = levelConfig.label;
-    let lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
+    lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
     lettersInUnit.forEach(target => {
         let formChar = target.char;
         let questionText = "";
@@ -377,7 +378,7 @@ const generateLesson = (levelConfig) => {
   }
   else if (levelConfig.type === 'hareke_group') {
     lessonTitle = levelConfig.label;
-    let lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
+    lettersInUnit = ALPHABET.filter(l => l.group === levelConfig.group);
     lettersInUnit.forEach(target => {
         const harekeTypes = [{ type: 'ustun', label: 'Üstün', sign: '\u064E' }, { type: 'esre', label: 'Esre', sign: '\u0650' }, { type: 'otre', label: 'Ötre', sign: '\u064F' }];
         const selectedHareke = harekeTypes[Math.floor(Math.random() * harekeTypes.length)];
