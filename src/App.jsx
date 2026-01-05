@@ -4,7 +4,7 @@ import {
   ArrowRight, Mail, Lock, Eye, EyeOff, Clock, ChevronDown, ChevronUp, MapPin, 
   Loader2, ArrowLeft, RotateCcw, CheckCircle, Heart, Flame, Diamond, Volume2, 
   X, RefreshCw, MessageSquare, Sparkles, Send, Info, CloudSun, Wind, Quote, 
-  Trophy, Compass 
+  Trophy, Compass, Settings, Bell, LogOut, Award, Edit3, Calendar
 } from 'lucide-react';
 
 // ============================================================================================
@@ -216,7 +216,7 @@ const CURRICULUM = [
 const generateLesson = (levelConfig) => {
   let questions = [];
   let lessonTitle = "";
-  let lettersInUnit = []; // FIX: Değişkeni burada tanımladık
+  let lettersInUnit = []; 
   
   if (levelConfig.type === 'combination_easy' || levelConfig.type === 'combination_hard') {
       lessonTitle = levelConfig.label;
@@ -575,6 +575,157 @@ function QiblaScreen({ onBack }) {
              <p className="text-sm text-stone-500">Kıble Açısı</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProfileScreen({ stats }) {
+  // Mock user data
+  const user = {
+    name: "Ahmet Yılmaz",
+    level: "Orta Seviye",
+    joined: "Ocak 2024",
+    avatarColor: "bg-indigo-100 text-indigo-600"
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-stone-50 animate-fade-in scrollbar-hide">
+       {/* Header Revised */}
+       <div className="relative bg-gradient-to-br from-[#0F5132] to-[#064e3b] text-white pt-12 pb-20 px-6 rounded-b-[40px] shadow-2xl overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute inset-0 islamic-pattern opacity-10"></div>
+          <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
+          
+          <div className="flex items-center gap-5 relative z-10">
+             <div className="relative group cursor-pointer">
+                <div className={`w-24 h-24 rounded-full ${user.avatarColor} border-[3px] border-white/30 group-hover:border-white/50 transition-colors flex items-center justify-center shadow-lg backdrop-blur-sm`}>
+                    <User size={48} strokeWidth={1.5} />
+                </div>
+                <div className="absolute bottom-0 right-0 bg-white text-emerald-700 p-2 rounded-full shadow-lg hover:bg-stone-50 transition-transform active:scale-90 border border-stone-100">
+                    <Edit3 size={14} />
+                </div>
+             </div>
+             
+             <div className="flex-1">
+                <div className="flex items-start justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight leading-tight">{user.name}</h2>
+                        <div className="flex items-center gap-2 mt-1 mb-3">
+                            <Award size={16} className="text-yellow-400 fill-yellow-400" />
+                            <p className="text-emerald-50 text-sm font-medium tracking-wide">{user.level}</p>
+                        </div>
+                    </div>
+                    <button className="p-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors backdrop-blur-md border border-white/5">
+                        <Settings size={20} />
+                    </button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                   <div className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/5 flex items-center gap-2">
+                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]"></span>
+                       <span className="text-[10px] font-bold tracking-wider uppercase text-white/90">Öğrenci</span>
+                   </div>
+                   <div className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/5 flex items-center gap-2">
+                       <Calendar size={12} className="text-emerald-200" />
+                       <span className="text-[10px] font-medium text-emerald-100">{user.joined}</span>
+                   </div>
+                </div>
+             </div>
+          </div>
+       </div>
+
+       {/* Stats Grid Revised */}
+       <div className="px-6 -mt-12 relative z-20 mb-8">
+          <div className="bg-white p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-stone-100 flex justify-between items-center">
+             <div className="flex-1 flex flex-col items-center gap-1.5 group cursor-default">
+                <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:scale-110 transition-transform duration-300 shadow-sm"><Star size={24} fill="currentColor" className="drop-shadow-sm" /></div>
+                <span className="font-bold text-stone-800 text-xl tracking-tight mt-1">{stats.points}</span>
+                <span className="text-[10px] text-stone-400 uppercase font-bold tracking-widest">Puan</span>
+             </div>
+             <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-stone-200 to-transparent"></div>
+             <div className="flex-1 flex flex-col items-center gap-1.5 group cursor-default">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform duration-300 shadow-sm"><Flame size={24} fill="currentColor" className="drop-shadow-sm" /></div>
+                <span className="font-bold text-stone-800 text-xl tracking-tight mt-1">{stats.streak}</span>
+                <span className="text-[10px] text-stone-400 uppercase font-bold tracking-widest">Gün Seri</span>
+             </div>
+             <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-stone-200 to-transparent"></div>
+             <div className="flex-1 flex flex-col items-center gap-1.5 group cursor-default">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-300 shadow-sm"><Trophy size={24} fill="currentColor" className="drop-shadow-sm" /></div>
+                <span className="font-bold text-stone-800 text-xl tracking-tight mt-1">3</span>
+                <span className="text-[10px] text-stone-400 uppercase font-bold tracking-widest">Rozet</span>
+             </div>
+          </div>
+       </div>
+
+       {/* Content */}
+       <div className="p-6 space-y-8 pb-24 pt-0">
+          {/* Achievements */}
+          <div>
+             <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-stone-800 flex items-center gap-2 text-lg"><Award size={20} className="text-[#0F5132]"/> Başarılar</h3>
+                <button className="text-xs font-bold text-stone-400 hover:text-[#0F5132] transition-colors">Tümünü Gör</button>
+             </div>
+             
+             <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
+                <div className="min-w-[120px] bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-100 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm group hover:shadow-md transition-shadow cursor-pointer">
+                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">🚀</div>
+                   <div>
+                       <span className="text-sm font-bold text-stone-800 block">Hızlı Başlangıç</span>
+                       <span className="text-[10px] text-stone-500 font-medium">İlk 100 Puan</span>
+                   </div>
+                </div>
+                <div className="min-w-[120px] bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center shadow-sm group hover:shadow-md transition-shadow cursor-pointer">
+                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">📖</div>
+                   <div>
+                       <span className="text-sm font-bold text-stone-800 block">İlk Ders</span>
+                       <span className="text-[10px] text-stone-500 font-medium">Elif-Ba Tamamlandı</span>
+                   </div>
+                </div>
+                <div className="min-w-[120px] bg-stone-50 border border-stone-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center opacity-60 grayscale group hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer">
+                   <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-stone-300 shadow-sm"><Lock size={24} /></div>
+                   <div>
+                       <span className="text-sm font-bold text-stone-400 block">7 Gün Seri</span>
+                       <span className="text-[10px] text-stone-400 font-medium">Kilitli</span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          {/* Settings Menu */}
+          <div>
+             <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2 text-lg"><Settings size={20} className="text-[#0F5132]"/> Ayarlar</h3>
+             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm divide-y divide-stone-50 overflow-hidden">
+                <div className="p-4 flex items-center justify-between group hover:bg-stone-50 transition-colors cursor-pointer">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform"><Bell size={18} /></div>
+                      <div>
+                          <span className="text-sm font-bold text-stone-700 block">Hatırlatıcılar</span>
+                          <span className="text-xs text-stone-400">Namaz ve ders bildirimleri</span>
+                      </div>
+                   </div>
+                   <div className="w-11 h-6 bg-emerald-500 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div></div>
+                </div>
+                <div className="p-4 flex items-center justify-between group hover:bg-stone-50 transition-colors cursor-pointer">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform"><Volume2 size={18} /></div>
+                      <div>
+                          <span className="text-sm font-bold text-stone-700 block">Ses Efektleri</span>
+                          <span className="text-xs text-stone-400">Uygulama içi sesler</span>
+                      </div>
+                   </div>
+                   <div className="w-11 h-6 bg-emerald-500 rounded-full relative cursor-pointer"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div></div>
+                </div>
+                <button className="w-full p-4 flex items-center justify-between hover:bg-rose-50/50 transition-colors text-left group">
+                   <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors"><LogOut size={18} /></div>
+                      <span className="text-sm font-bold text-rose-600">Çıkış Yap</span>
+                   </div>
+                   <ArrowRight size={18} className="text-stone-300 group-hover:text-rose-300 transition-colors" />
+                </button>
+             </div>
+          </div>
+       </div>
     </div>
   );
 }
@@ -1161,7 +1312,7 @@ function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels }
         {view === 'zikirmatik' && <ZikirmatikScreen onBack={() => setView('dashboard')} />}
         {view === 'qibla' && <QiblaScreen onBack={() => setView('dashboard')} />}
         {view === 'saves' && <div className="p-8 text-center text-stone-500">Ezberler (Yakında)</div>}
-        {view === 'profile' && <div className="p-8 text-center text-stone-500">Profil (Yakında)</div>}
+        {view === 'profile' && <ProfileScreen stats={stats} />}
         {view === 'chat' && <GeminiChatScreen onBack={() => setView('dashboard')} />}
       </main>
 
