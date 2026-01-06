@@ -4,7 +4,7 @@ import {
   ArrowRight, Mail, Lock, Eye, EyeOff, Clock, ChevronDown, ChevronUp, MapPin, 
   Loader2, ArrowLeft, RotateCcw, CheckCircle, Heart, Flame, Diamond, Volume2, 
   X, RefreshCw, MessageSquare, Sparkles, Send, Info, CloudSun, Wind, Quote, 
-  Trophy, Compass, Settings, Bell, LogOut, Award, Edit3, Calendar, Crown, Coffee, Gift, Zap, ShieldCheck, UserPlus, LogIn, Check, Mic, Lightbulb, Infinity
+  Trophy, Compass, Settings, Bell, LogOut, Award, Edit3, Calendar, Crown, Coffee, Gift, Zap, ShieldCheck, UserPlus, LogIn, Check, Mic, Lightbulb
 } from 'lucide-react';
 
 // ============================================================================================
@@ -892,7 +892,7 @@ function QuranScreen({ onBack }) {
 }
 
 // 3. Gemini Chat Screen (Modified to accept messages as props)
-function GeminiChatScreen({ onBack, messages, setMessages }) {
+function GeminiChatScreen({ onBack, messages, setMessages, onReset }) {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const bottomRef = useRef(null);
@@ -916,18 +916,23 @@ function GeminiChatScreen({ onBack, messages, setMessages }) {
 
     return (
         <div className="flex flex-col h-full bg-stone-50">
-            <div className="bg-white border-b border-stone-200 p-4 flex items-center gap-3 sticky top-0 z-20">
-                <button onClick={onBack}><ArrowLeft size={24} className="text-stone-600"/></button>
-                <div className="w-10 h-10 rounded-full bg-[#0F5132] flex items-center justify-center text-white">
-                    <HocaIcon size={20} color="white" />
-                </div>
-                <div>
-                    <h2 className="font-bold text-stone-800">Bilge Hoca</h2>
-                    <div className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span className="text-xs text-stone-500">Çevrimiçi</span>
+            <div className="bg-white border-b border-stone-200 p-4 flex items-center justify-between sticky top-0 z-20">
+                <div className="flex items-center gap-3">
+                    <button onClick={onBack}><ArrowLeft size={24} className="text-stone-600"/></button>
+                    <div className="w-10 h-10 rounded-full bg-[#0F5132] flex items-center justify-center text-white">
+                        <HocaIcon size={20} color="white" />
+                    </div>
+                    <div>
+                        <h2 className="font-bold text-stone-800">Bilge Hoca</h2>
+                        <div className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span className="text-xs text-stone-500">Çevrimiçi</span>
+                        </div>
                     </div>
                 </div>
+                 <button onClick={onReset} className="p-2 bg-stone-100 hover:bg-stone-200 rounded-full text-stone-600 transition-colors" title="Yeni Sohbet">
+                    <RefreshCw size={20} />
+                </button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1602,7 +1607,7 @@ function DashboardContent({ setView }) {
 // ANA YAPI
 // -------------------------------------------------------------------------
 
-function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels, user, onLoginClick, onLogout, chatMessages, setChatMessages }) {
+function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels, user, onLoginClick, onLogout, chatMessages, setChatMessages, onResetChat }) {
   const isDashboard = view === 'dashboard';
 
   return (
@@ -1615,7 +1620,7 @@ function MainAppLayout({ view, setView, stats, startLevelFlow, completedLevels, 
         {view === 'qibla' && <QiblaScreen onBack={() => setView('dashboard')} />}
         {view === 'saves' && <div className="p-8 text-center text-stone-500 mt-20">Ezberler Modülü Yakında Eklenecek.</div>}
         {view === 'profile' && <ProfileScreen stats={stats} user={user} onLoginClick={onLoginClick} onLogout={onLogout} />}
-        {view === 'chat' && <GeminiChatScreen onBack={() => setView('dashboard')} messages={chatMessages} setMessages={setChatMessages} />}
+        {view === 'chat' && <GeminiChatScreen onBack={() => setView('dashboard')} messages={chatMessages} setMessages={setChatMessages} onReset={onResetChat} />}
       </main>
 
       <nav className="bg-white border-t border-stone-100 px-2 py-2 flex justify-around items-end pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-30 h-20">
@@ -1656,6 +1661,12 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState([
     { id: 1, role: 'ai', text: 'Selamün aleyküm! Ben senin Kuran asistanınım. Kuran, hadisler veya İslami yaşam hakkında ne sormak istersin?' }
   ]);
+
+  const handleResetChat = () => {
+      setChatMessages([
+        { id: 1, role: 'ai', text: 'Selamün aleyküm! Ben senin Kuran asistanınım. Kuran, hadisler veya İslami yaşam hakkında ne sormak istersin?' }
+      ]);
+  };
 
   useEffect(() => {
     if (currentScreen === 'splash') {
@@ -1729,6 +1740,7 @@ export default function App() {
                 onLogout={handleLogout}
                 chatMessages={chatMessages}
                 setChatMessages={setChatMessages}
+                onResetChat={handleResetChat}
             />
             {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} onLogin={handleLogin} />}
           </>
